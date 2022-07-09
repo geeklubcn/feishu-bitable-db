@@ -78,7 +78,7 @@ func (b *db) Read(ctx context.Context, database, table string, ss []SearchCmd) [
 		return nil
 	}
 	logrus.WithContext(c).Debugf("response:%s", tools.Prettify(message))
-	res := make([]map[string]interface{}, len(message.Items))
+	res := make([]map[string]interface{}, 0)
 	for _, it := range message.Items {
 		record := make(map[string]interface{}, 0)
 		for k, v := range it.Fields {

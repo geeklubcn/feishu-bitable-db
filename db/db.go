@@ -139,7 +139,7 @@ func (b *db) SaveTable(ctx context.Context, database string, table Table) (strin
 
 func (b *db) ListTables(ctx context.Context, database string) []string {
 	m := b.listTables(ctx, database)
-	res := make([]string, len(m))
+	res := make([]string, 0)
 	for k := range m {
 		res = append(res, k)
 	}
@@ -181,7 +181,7 @@ func (b *db) listTables(ctx context.Context, database string) map[string]string 
 		return nil
 	}
 	logrus.WithContext(c).Debugf("response:%s", tools.Prettify(message))
-	res := make(map[string]string, len(message.Items))
+	res := make(map[string]string, 0)
 	for _, it := range message.Items {
 		res[it.Name] = it.TableId
 	}
