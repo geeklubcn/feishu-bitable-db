@@ -23,7 +23,17 @@ func (b *db) Create(ctx context.Context, database, table string, record map[stri
 		return "", errors.New(fmt.Sprintf("table[%s.%s] not exists", database, table))
 	}
 
-	record["id"] = ""
+	fs, _ := b.ListFields(ctx, did, tid)
+	mfs := make(map[string]string, 0)
+	for _, it := range fs {
+		mfs[it.FieldName] = it.FieldId
+	}
+	if id, exist := mfs["id"]; exist {
+		record["id"] = ""
+		defer func() {
+			_ = b.Update(ctx, database, table, id, map[string]interface{}{})
+		}()
+	}
 	body := &larkBitable.AppTableRecord{Fields: record}
 
 	logrus.WithContext(c).Infof("request: %s", tools.Prettify(body))
@@ -37,7 +47,6 @@ func (b *db) Create(ctx context.Context, database, table string, record map[stri
 	}
 	logrus.WithContext(c).Debugf("response:%s", tools.Prettify(message))
 	id = message.Record.RecordId
-	_ = b.Update(ctx, database, table, id, map[string]interface{}{})
 	return id, nil
 }
 
@@ -101,7 +110,15 @@ func (b *db) Update(ctx context.Context, database, table, id string, record map[
 		return errors.New(fmt.Sprintf("table[%s.%s] not exists", database, table))
 	}
 
-	record["id"] = id
+	fs, _ := b.ListFields(ctx, did, tid)
+	mfs := make(map[string]string, 0)
+	for _, it := range fs {
+		mfs[it.FieldName] = it.FieldId
+	}
+	if id, exist := mfs["id"]; exist {
+		record["id"] = id
+	}
+
 	body := &larkBitable.AppTableRecord{
 		Fields: record,
 	}

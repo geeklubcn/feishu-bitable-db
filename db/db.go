@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"strings"
 	"sync"
 
 	"github.com/geeklubcn/feishu-bitable-db/client/bitable"
@@ -207,6 +208,9 @@ func (b *db) saveTable(ctx context.Context, appToken, name string) (string, erro
 }
 
 func (b *db) getDid(ctx context.Context, database string) (string, bool) {
+	if strings.HasPrefix(database, "bascn") {
+		return database, true
+	}
 	if v, ok := b.cache.Load(fmt.Sprintf("db-%s", database)); ok {
 		return v.(string), true
 	}
