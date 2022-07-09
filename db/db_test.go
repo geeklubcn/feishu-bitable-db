@@ -59,13 +59,13 @@ func TestDB(t *testing.T) {
 			"username": "zhangsan",
 			"age":      12,
 		})
-		fmt.Println(id, err)
 		err = db.Update(ctx, dbName, tableName, id, map[string]interface{}{
 			"username": "zhangsan13",
 			"age":      13,
 		})
 		assert.NoError(t, err)
-
+		err = db.Delete(ctx, dbName, tableName, id)
+		assert.NoError(t, err)
 	})
 
 	t.Run("read record", func(t *testing.T) {

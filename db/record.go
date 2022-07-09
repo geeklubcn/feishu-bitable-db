@@ -118,3 +118,27 @@ func (b *db) Update(ctx context.Context, database, table, id string, record map[
 	logrus.WithContext(c).Debugf("response:%s", tools.Prettify(message))
 	return nil
 }
+
+func (b *db) Delete(ctx context.Context, database, table, id string) error {
+	c := core.WrapContext(ctx)
+	did, exist := b.getDid(ctx, database)
+	if !exist {
+		return errors.New(fmt.Sprintf("database[%s] not exists", database))
+	}
+	tid, exist := b.getTid(ctx, database, table)
+	if !exist {
+		return errors.New(fmt.Sprintf("table[%s.%s] not exists", database, table))
+	}
+
+	reqCall := b.service.AppTableRecords.Delete(c)
+	reqCall.SetAppToken(did)
+	reqCall.SetTableId(tid)
+	reqCall.SetRecordId(id)
+	message, err := reqCall.Do()
+	if err != nil {
+		logrus.WithContext(c).WithError(err).Errorf("BatchUpdateRecord fail! appToken:%s, tableId:%s, response:%s", did, tid, tools.Prettify(message))
+		return err
+	}
+	logrus.WithContext(c).Debugf("response:%s", tools.Prettify(message))
+	return nil
+}

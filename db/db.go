@@ -31,6 +31,8 @@ type DB interface {
 	Read(ctx context.Context, database, table string, ss []SearchCmd) []map[string]interface{}
 	// Update record by id.
 	Update(ctx context.Context, database, table, id string, record map[string]interface{}) error
+	// Delete record by id.
+	Delete(ctx context.Context, database, table, id string) error
 }
 
 type db struct {
