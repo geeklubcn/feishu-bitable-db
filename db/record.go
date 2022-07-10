@@ -28,7 +28,7 @@ func (b *db) Create(ctx context.Context, database, table string, record map[stri
 	for _, it := range fs {
 		mfs[it.FieldName] = it.FieldId
 	}
-	if id, exist := mfs[ID]; exist {
+	if _, exist := mfs[ID]; exist {
 		record[ID] = ""
 		defer func() {
 			_ = b.Update(ctx, database, table, id, map[string]interface{}{})
@@ -118,7 +118,7 @@ func (b *db) Update(ctx context.Context, database, table, id string, record map[
 	for _, it := range fs {
 		mfs[it.FieldName] = it.FieldId
 	}
-	if id, exist := mfs[ID]; exist {
+	if _, exist := mfs[ID]; exist {
 		record[ID] = id
 	}
 
