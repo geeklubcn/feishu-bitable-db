@@ -8,6 +8,7 @@ const (
 )
 
 const (
+	ID   = "id"
 	Name = "Databases"
 )
 

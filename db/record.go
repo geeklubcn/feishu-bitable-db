@@ -28,8 +28,8 @@ func (b *db) Create(ctx context.Context, database, table string, record map[stri
 	for _, it := range fs {
 		mfs[it.FieldName] = it.FieldId
 	}
-	if id, exist := mfs["id"]; exist {
-		record["id"] = ""
+	if id, exist := mfs[ID]; exist {
+		record[ID] = ""
 		defer func() {
 			_ = b.Update(ctx, database, table, id, map[string]interface{}{})
 		}()
@@ -72,11 +72,14 @@ func (b *db) Read(ctx context.Context, database, table string, ss []SearchCmd) [
 		}
 	}
 	filter := ""
-	if len(filters) > 1 {
-		filter = "AND(" + strings.Join(filters, ",") + ")"
-	} else {
+	switch len(filters) {
+	case 0:
+	case 1:
 		filter = "AND(" + strings.Join(filters, "") + ")"
+	default:
+		filter = "AND(" + strings.Join(filters, ",") + ")"
 	}
+
 	reqCall := b.service.AppTableRecords.List(c)
 	reqCall.SetAppToken(did)
 	reqCall.SetTableId(tid)
@@ -115,8 +118,8 @@ func (b *db) Update(ctx context.Context, database, table, id string, record map[
 	for _, it := range fs {
 		mfs[it.FieldName] = it.FieldId
 	}
-	if id, exist := mfs["id"]; exist {
-		record["id"] = id
+	if id, exist := mfs[ID]; exist {
+		record[ID] = id
 	}
 
 	body := &larkBitable.AppTableRecord{

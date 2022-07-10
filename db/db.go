@@ -101,15 +101,15 @@ func (b *db) SaveTable(ctx context.Context, database string, table Table) (strin
 	}
 
 	// id
-	if fs[0].FieldName != "id" {
+	if fs[0].FieldName != ID {
 		_ = b.UpdateField(ctx, did, tableId, &larkBitable.AppTableField{
 			FieldId:   fs[0].FieldId,
-			FieldName: "id",
+			FieldName: ID,
 			Type:      int(String),
 		})
 		delete(ofm, fs[0].FieldName)
 	}
-	delete(ofm, "id")
+	delete(ofm, ID)
 
 	for _, f := range table.Fields {
 		of, exist := ofm[f.Name]
