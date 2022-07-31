@@ -3,8 +3,12 @@ package db
 type FieldType int
 
 const (
-	String FieldType = iota + 1
-	Int
+	String      FieldType = 1
+	Int         FieldType = 2
+	Radio       FieldType = 3
+	MultiSelect FieldType = 4
+	Date        FieldType = 5
+	People      FieldType = 11
 )
 
 const (
