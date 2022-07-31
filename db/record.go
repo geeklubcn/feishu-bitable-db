@@ -84,6 +84,7 @@ func (b *db) Read(ctx context.Context, database, table string, ss []SearchCmd) [
 	reqCall.SetAppToken(did)
 	reqCall.SetTableId(tid)
 	reqCall.SetFilter(filter)
+	reqCall.SetPageSize(1000)
 	message, err := reqCall.Do()
 	if err != nil {
 		logrus.WithContext(c).WithError(err).Errorf("ListRecords fail! database:%s, table:%s, filter:%s, response:%s", database, table, filter, tools.Prettify(message))
@@ -96,6 +97,7 @@ func (b *db) Read(ctx context.Context, database, table string, ss []SearchCmd) [
 		for k, v := range it.Fields {
 			record[k] = v
 		}
+		record[ID] = it.RecordId
 		res = append(res, record)
 	}
 
