@@ -2,7 +2,6 @@ package db
 
 import (
 	"context"
-	"errors"
 	"fmt"
 	"strings"
 
@@ -14,16 +13,8 @@ import (
 
 func (b *db) Create(ctx context.Context, database, table string, record map[string]interface{}) (id string, err error) {
 	c := core.WrapContext(ctx)
-	did, exist := b.getDid(ctx, database)
-	if !exist {
-		return "", errors.New(fmt.Sprintf("database[%s] not exists", database))
-	}
-	tid, exist := b.getTid(ctx, database, table)
-	if !exist {
-		return "", errors.New(fmt.Sprintf("table[%s.%s] not exists", database, table))
-	}
 
-	fs, _ := b.ListFields(ctx, did, tid)
+	fs, _ := b.ListFields(ctx, database, table)
 	mfs := make(map[string]string, 0)
 	for _, it := range fs {
 		mfs[it.FieldName] = it.FieldId
@@ -38,8 +29,8 @@ func (b *db) Create(ctx context.Context, database, table string, record map[stri
 
 	logrus.WithContext(c).Infof("request: %s", tools.Prettify(body))
 	reqCall := b.service.AppTableRecords.Create(c, body)
-	reqCall.SetAppToken(did)
-	reqCall.SetTableId(tid)
+	reqCall.SetAppToken(database)
+	reqCall.SetTableId(table)
 	message, err := reqCall.Do()
 	if err != nil {
 		logrus.WithContext(c).WithError(err).Errorf("BatchCreateRecord fail! database:%s,table:%s,response:%s", database, table, tools.Prettify(message))
@@ -52,14 +43,6 @@ func (b *db) Create(ctx context.Context, database, table string, record map[stri
 
 func (b *db) Read(ctx context.Context, database, table string, ss []SearchCmd) []map[string]interface{} {
 	c := core.WrapContext(ctx)
-	did, exist := b.getDid(ctx, database)
-	if !exist {
-		return nil
-	}
-	tid, exist := b.getTid(ctx, database, table)
-	if !exist {
-		return nil
-	}
 	filters := make([]string, 0)
 	for _, s := range ss {
 		switch v := s.Val.(type) {
@@ -81,8 +64,8 @@ func (b *db) Read(ctx context.Context, database, table string, ss []SearchCmd) [
 	}
 
 	reqCall := b.service.AppTableRecords.List(c)
-	reqCall.SetAppToken(did)
-	reqCall.SetTableId(tid)
+	reqCall.SetAppToken(database)
+	reqCall.SetTableId(table)
 	reqCall.SetFilter(filter)
 	reqCall.SetPageSize(1000)
 	message, err := reqCall.Do()
@@ -106,16 +89,8 @@ func (b *db) Read(ctx context.Context, database, table string, ss []SearchCmd) [
 
 func (b *db) Update(ctx context.Context, database, table, id string, record map[string]interface{}) error {
 	c := core.WrapContext(ctx)
-	did, exist := b.getDid(ctx, database)
-	if !exist {
-		return errors.New(fmt.Sprintf("database[%s] not exists", database))
-	}
-	tid, exist := b.getTid(ctx, database, table)
-	if !exist {
-		return errors.New(fmt.Sprintf("table[%s.%s] not exists", database, table))
-	}
 
-	fs, _ := b.ListFields(ctx, did, tid)
+	fs, _ := b.ListFields(ctx, database, table)
 	mfs := make(map[string]string, 0)
 	for _, it := range fs {
 		mfs[it.FieldName] = it.FieldId
@@ -129,12 +104,12 @@ func (b *db) Update(ctx context.Context, database, table, id string, record map[
 	}
 
 	reqCall := b.service.AppTableRecords.Update(c, body)
-	reqCall.SetAppToken(did)
-	reqCall.SetTableId(tid)
+	reqCall.SetAppToken(database)
+	reqCall.SetTableId(table)
 	reqCall.SetRecordId(id)
 	message, err := reqCall.Do()
 	if err != nil {
-		logrus.WithContext(c).WithError(err).Errorf("BatchUpdateRecord fail! appToken:%s, tableId:%s, response:%s", did, tid, tools.Prettify(message))
+		logrus.WithContext(c).WithError(err).Errorf("BatchUpdateRecord fail! appToken:%s, tableId:%s, response:%s", database, table, tools.Prettify(message))
 		return err
 	}
 	logrus.WithContext(c).Debugf("response:%s", tools.Prettify(message))
@@ -143,22 +118,14 @@ func (b *db) Update(ctx context.Context, database, table, id string, record map[
 
 func (b *db) Delete(ctx context.Context, database, table, id string) error {
 	c := core.WrapContext(ctx)
-	did, exist := b.getDid(ctx, database)
-	if !exist {
-		return errors.New(fmt.Sprintf("database[%s] not exists", database))
-	}
-	tid, exist := b.getTid(ctx, database, table)
-	if !exist {
-		return errors.New(fmt.Sprintf("table[%s.%s] not exists", database, table))
-	}
 
 	reqCall := b.service.AppTableRecords.Delete(c)
-	reqCall.SetAppToken(did)
-	reqCall.SetTableId(tid)
+	reqCall.SetAppToken(database)
+	reqCall.SetTableId(table)
 	reqCall.SetRecordId(id)
 	message, err := reqCall.Do()
 	if err != nil {
-		logrus.WithContext(c).WithError(err).Errorf("BatchUpdateRecord fail! appToken:%s, tableId:%s, response:%s", did, tid, tools.Prettify(message))
+		logrus.WithContext(c).WithError(err).Errorf("BatchUpdateRecord fail! appToken:%s, tableId:%s, response:%s", database, table, tools.Prettify(message))
 		return err
 	}
 	logrus.WithContext(c).Debugf("response:%s", tools.Prettify(message))
